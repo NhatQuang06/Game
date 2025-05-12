@@ -1,0 +1,28 @@
+# depslib dependency file v1.0
+1742443120 source:e:\c++\demosdl\ahsj\main.cpp
+	<SDL.h>
+	<SDL_ttf.h>
+	<iostream>
+	<vector>
+	<cstdlib>
+	<ctime>
+	<SDL_image.h>
+
+1746243574 source:e:\c++\demosdl\game\main.cpp
+	<SDL.h>
+	<SDL_ttf.h>
+	<iostream>
+	<vector>
+	<cstdlib>
+	<ctime>
+	<SDL_image.h>
+
+1746677449 source:e:\c++\game\main.cpp
+	<SDL.h>
+	<SDL_ttf.h>
+	<iostream>
+	<vector>
+	<cstdlib>
+	<ctime>
+	<SDL_image.h>
+
