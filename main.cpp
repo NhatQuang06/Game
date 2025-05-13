@@ -1,20 +1,7 @@
-#define SDL_MAIN_HANDLED
-#include <SDL.h>
-#include <SDL_ttf.h>
-#include <iostream>
-#include <vector>
-#include <cstdlib>
-#include <ctime>
-#include <SDL_image.h>
-const int WIDTH = 1200;
-const int HEIGHT = 700;
-const int FRAME_COUNT = 6;
-const int FRAME_COLS = 3;
-const int FRAME_ROWS = 2;
-const int ANIMATION_SPEED = 70;
-const int JUMP_HEIGHT = 200;
-const int GRAVITY = 5;
-const int OBSTACLE_SPEED = 15;
+#include "def.h"
+#include "Button.h"
+#include "Player.cpp"
+#include "Obstacle.cpp"
 
 SDL_Window* window = nullptr;
 SDL_Renderer* renderer = nullptr;
@@ -24,134 +11,13 @@ SDL_Texture* backgroundTexture = nullptr;
 SDL_Rect frames[FRAME_COUNT];
 TTF_Font* font = nullptr;
 
+bool inMainMenu = true;
 bool gameOver = false;
-bool showMenu = false;
-
-struct Button {
-    SDL_Rect rect;
-    std::string text;
-    SDL_Color color;
-    SDL_Texture* texture;
-
-    Button(int x, int y, int w, int h, const std::string& t)
-        : rect{ x, y, w, h }, text(t), color({255, 255, 255, 255}), texture(nullptr) {}
-
-    void createTexture(SDL_Renderer* renderer, TTF_Font* font) {
-        SDL_Surface* surface = TTF_RenderText_Solid(font, text.c_str(), color);
-        texture = SDL_CreateTextureFromSurface(renderer, surface);
-        SDL_FreeSurface(surface);
-    }
-
-    void render(SDL_Renderer* renderer) {
-        SDL_SetRenderDrawColor(renderer, 200, 0, 0, 255);
-        SDL_RenderFillRect(renderer, &rect);
-        if (texture) {
-            int texW, texH;
-            SDL_QueryTexture(texture, NULL, NULL, &texW, &texH);
-            SDL_Rect dst = { rect.x + (rect.w - texW) / 2, rect.y + (rect.h - texH) / 2, texW, texH };
-            SDL_RenderCopy(renderer, texture, NULL, &dst);
-        }
-    }
-
-    bool isClicked(int x, int y) {
-        return x > rect.x && x < rect.x + rect.w && y > rect.y && y < rect.y + rect.h;
-    }
-};
-
-std::vector<Button> buttons;
-
-class Player {
-public:
-    int x, y, startY;
-    bool jumping = false, falling = false;
-    SDL_Rect* frames;
-    int frameIndex = 0;
-
-    Player(SDL_Rect* spriteFrames) : x(50), frames(spriteFrames) {
-        y = HEIGHT - frames[0].h * 0.5 - 50;
-    }
-
-    void handleJump() {
-        if (!jumping && !falling) {
-            jumping = true;
-            startY = y;
-        }
-    }
-
-    void update(Uint32& lastUpdate) {
-        Uint32 now = SDL_GetTicks();
-        if (now - lastUpdate > ANIMATION_SPEED) {
-            frameIndex = (frameIndex + 1) % FRAME_COUNT;
-            lastUpdate = now;
-        }
-
-        if (jumping) {
-            y -= GRAVITY * 2;
-            if (startY - y >= JUMP_HEIGHT) {
-                jumping = false;
-                falling = true;
-            }
-        } else if (falling) {
-            y += GRAVITY;
-            if (y >= HEIGHT - frames[0].h * 0.5 - 50) {
-                y = HEIGHT - frames[0].h * 0.5 - 50;
-                falling = false;
-            }
-        }
-    }
-
-    void reset() {
-        x = 50;
-        y = HEIGHT - frames[0].h * 0.5 - 50;
-        frameIndex = 0;
-        jumping = false;
-        falling = false;
-    }
-
-    SDL_Rect getDestRect() const {
-        return { x, y + 120, static_cast<int>(frames[0].w * 0.3), static_cast<int>(frames[0].h * 0.3) };
-    }
-
-    SDL_Rect getHitbox() const {
-        SDL_Rect rect = getDestRect();
-        return { rect.x + 10, rect.y + 20, rect.w - 10, rect.h - 10 };
-    }
-
-    void render(SDL_Renderer* renderer, SDL_Texture* texture, bool isGameOver) const {
-        SDL_Rect dest = getDestRect();
-        SDL_RenderCopy(renderer, texture, isGameOver ? &frames[0] : &frames[frameIndex], &dest);
-    }
-};
-
-class Obstacle {
-public:
-    int x;
-    Obstacle() : x(WIDTH) {}
-
-    void update() {
-        x -= OBSTACLE_SPEED;
-        if (x < -50) x = WIDTH;
-    }
-
-    SDL_Rect getRect() const {
-        return { x + 40, HEIGHT - 150, 100, 100 };
-    }
-
-    SDL_Rect getHitbox() const {
-        SDL_Rect rect = getRect();
-        return { rect.x + 5, rect.y + 5, rect.w - 10, rect.h - 10 };
-    }
-
-    void render(SDL_Renderer* renderer, SDL_Texture* texture) const {
-        SDL_Rect rect = getRect();
-        SDL_RenderCopy(renderer, texture, nullptr, &rect);
-    }
-
-    void reset() {
-        x = WIDTH;
-    }
-};
-
+Button* startButton;
+Button* musicButton;
+Button* exitButton;
+Button* restartButton;
+Button* backToMenuButton;
 Uint32 lastUpdate = 0;
 Player* player = nullptr;
 Obstacle* obstacle = nullptr;
@@ -164,9 +30,16 @@ bool init() {
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (!renderer) return false;
     font = TTF_OpenFont("times.ttf", 24);
-    return font != nullptr;
-}
+    // Khởi tạo các nút
+    SDL_Color textColor = {255, 255, 255, 255};
+    startButton = new Button(WIDTH / 2 - 100, HEIGHT / 2 - 50, 200, 40, "Start Game", textColor, font);
+    musicButton = new Button(WIDTH / 2 - 100, HEIGHT / 2, 200, 40, "Music", textColor, font);
+    exitButton = new Button(WIDTH / 2 - 100, HEIGHT / 2 + 50, 200, 40, "Exit Game", textColor, font);
 
+    restartButton = new Button(WIDTH / 2 - 100, HEIGHT / 2 - 20, 200, 40, "Restart", textColor, font);
+    backToMenuButton = new Button(WIDTH / 2 - 100, HEIGHT / 2 + 30, 200, 40, "Main Menu", textColor, font);
+    return true;
+}
 bool loadMedia() {
     backgroundTexture = IMG_LoadTexture(renderer, "background.png");
     spriteSheet = IMG_LoadTexture(renderer, "player_spritesheet.png");
@@ -180,76 +53,107 @@ bool loadMedia() {
     for (int i = 0; i < FRAME_COUNT; i++) {
         frames[i] = { (i % FRAME_COLS) * frameWidth, (i / FRAME_COLS) * frameHeight, frameWidth, frameHeight };
     }
-
-    buttons.push_back(Button(WIDTH / 2 - 100, 270, 200, 50, "Retry"));
-    buttons.push_back(Button(WIDTH / 2 - 100, 340, 200, 50, "Exit"));
-
-    for (auto& btn : buttons) {
-        btn.createTexture(renderer, font);
-    }
-
     return true;
 }
 
 void close() {
-    for (auto& btn : buttons) {
-        SDL_DestroyTexture(btn.texture);
-    }
     SDL_DestroyTexture(spriteSheet);
     SDL_DestroyTexture(obstacleTexture);
     SDL_DestroyTexture(backgroundTexture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
+    delete startButton;
+    delete musicButton;
+    delete exitButton;
+    delete restartButton;
+    delete backToMenuButton;
     TTF_CloseFont(font);
     TTF_Quit();
     SDL_Quit();
 }
 
+// ================= MENU & RENDER ===================
 void renderMenu() {
-    SDL_RenderClear(renderer);
-    SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
-    for (auto& btn : buttons) {
-        btn.render(renderer);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 180);
+    SDL_Rect menuRect = { WIDTH / 4, HEIGHT / 4, WIDTH / 2, HEIGHT / 2 };
+    SDL_RenderFillRect(renderer, &menuRect);
+    if (inMainMenu) {
+        startButton->render(renderer);
+        musicButton->render(renderer);
+        exitButton->render(renderer);
+    } else if (gameOver) {
+        restartButton->render(renderer);
+        backToMenuButton->render(renderer);
     }
-    SDL_RenderPresent(renderer);
 }
 
 void handleEvents(bool& running) {
     SDL_Event e;
     while (SDL_PollEvent(&e)) {
         if (e.type == SDL_QUIT) running = false;
-        else if (e.type == SDL_KEYDOWN && !showMenu) {
-            if (!gameOver && e.key.keysym.sym == SDLK_SPACE) {
+
+        else if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
+            int x = e.button.x;
+            int y = e.button.y;
+            if (inMainMenu) {
+                if (startButton->isClicked(x, y)) {
+                    inMainMenu = false;
+                    gameOver = false;
+                } else if (musicButton->isClicked(x, y)) {
+
+                } else if (exitButton->isClicked(x, y)) {
+                    running = false;
+                }
+            } else if (gameOver) {
+                if (restartButton->isClicked(x, y)) {
+                    gameOver = false;
+                    delete player;
+                    delete obstacle;
+                    player = new Player(frames);
+                    obstacle = new Obstacle();
+                } else if (backToMenuButton->isClicked(x, y)) {
+                    inMainMenu = true;
+                }
+            }
+        }
+        else if (e.type == SDL_MOUSEMOTION) {
+            int x = e.motion.x;
+            int y = e.motion.y;
+
+            startButton->setHovered(false);
+            musicButton->setHovered(false);
+            exitButton->setHovered(false);
+            restartButton->setHovered(false);
+            backToMenuButton->setHovered(false);
+
+            if (inMainMenu) {
+                if (startButton->isMouseOver(x, y)) startButton->setHovered(true);
+                if (musicButton->isMouseOver(x, y)) musicButton->setHovered(true);
+                if (exitButton->isMouseOver(x, y)) exitButton->setHovered(true);
+            } else if (gameOver) {
+                if (restartButton->isMouseOver(x, y)) restartButton->setHovered(true);
+                if (backToMenuButton->isMouseOver(x, y)) backToMenuButton->setHovered(true);
+            }
+        }
+        else if (e.type == SDL_KEYDOWN && !inMainMenu && !gameOver) {
+            if (e.key.keysym.sym == SDLK_SPACE) {
                 player->handleJump();
-            } else if (gameOver && e.key.keysym.sym == SDLK_r) {
-                gameOver = false;
-                showMenu = false;
-                player->reset();
-                obstacle->reset();
-                lastUpdate = SDL_GetTicks();
-            } else if (e.key.keysym.sym == SDLK_ESCAPE) running = false;
-        } else if (e.type == SDL_MOUSEBUTTONDOWN && showMenu) {
-            int mx = e.button.x;
-            int my = e.button.y;
-            if (buttons[0].isClicked(mx, my)) {                    // Retry
-                gameOver = false;
-                showMenu = false;
-                player->reset();
-                obstacle->reset();
-                lastUpdate = SDL_GetTicks();
-            } else if (buttons[1].isClicked(mx, my)) running = false;   // Exit
+            }
         }
     }
 }
 
 void render(const Player* player, const Obstacle* obstacle) {
+    SDL_Rect bgRect = { 0, 0, WIDTH, HEIGHT };
     SDL_RenderClear(renderer);
-    SDL_RenderCopy(renderer, backgroundTexture, nullptr, nullptr);
+    SDL_RenderCopy(renderer, backgroundTexture, nullptr, &bgRect);
     player->render(renderer, spriteSheet, gameOver);
     obstacle->render(renderer, obstacleTexture);
+    if (gameOver) renderMenu();
     SDL_RenderPresent(renderer);
 }
 
+// ================= GAME LOOP ===================
 void runGameLoop() {
     bool running = true;
     lastUpdate = SDL_GetTicks();
@@ -258,36 +162,35 @@ void runGameLoop() {
 
     while (running) {
         handleEvents(running);
-        if (showMenu) {
+        if (inMainMenu) {
+            // Hiển thị menu
             renderMenu();
-            SDL_Delay(16);
-            continue;
-        }
+        } else {
+            // Nếu game chưa kết thúc, tiếp tục cập nhật
+            if (!gameOver) {
+                player->update(lastUpdate);
+                obstacle->update();
+                SDL_Rect playerHitbox = player->getHitbox();
+                SDL_Rect obstacleHitbox = obstacle->getHitbox();
 
-        if (!gameOver) {
-            player->update(lastUpdate);
-            obstacle->update();
-            SDL_Rect playerHitbox = player->getHitbox();
-            SDL_Rect obstacleHitbox = obstacle->getHitbox();
-            if (SDL_HasIntersection(&playerHitbox, &obstacleHitbox)) {
-                gameOver = true;
-                showMenu = true;
+                if (SDL_HasIntersection(&playerHitbox, &obstacleHitbox)) {
+                    gameOver = true;
+                }
             }
+            render(player, obstacle);
         }
 
-        render(player, obstacle);
+        SDL_RenderPresent(renderer);
         SDL_Delay(16);
     }
-
     delete player;
     delete obstacle;
 }
 
+// ================= MAIN ===================
 int main(int argc, char* args[]) {
     if (!init() || !loadMedia()) return -1;
     runGameLoop();
     close();
     return 0;
 }
-
-

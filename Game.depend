@@ -17,7 +17,13 @@
 	<ctime>
 	<SDL_image.h>
 
-1746677449 source:e:\c++\game\main.cpp
+1747125838 source:e:\c++\game\main.cpp
+	"def.h"
+	"Button.h"
+	"Player.cpp"
+	"Obstacle.cpp"
+
+1747123008 e:\c++\game\def.h
 	<SDL.h>
 	<SDL_ttf.h>
 	<iostream>
@@ -25,4 +31,58 @@
 	<cstdlib>
 	<ctime>
 	<SDL_image.h>
+
+1747115075 e:\c++\game\button.c
+	"def.h"
+
+1747126675 source:e:\c++\game\button.cpp
+	"Button.h"
+	<SDL.h>
+	<SDL_ttf.h>
+
+1747119532 e:\c++\game\button.cpp
+	"def.h"
+
+1747122995 source:e:\c++\game\player.cpp
+	"def.h"
+
+1747122995 source:e:\c++\game\obstacle.cpp
+	"def.h"
+
+1747122995 e:\c++\game\player.cpp
+	"def.h"
+
+1747122995 e:\c++\game\obstacle.cpp
+	"def.h"
+
+1747118734 e:\c++\game\loadtexture.cpp
+	"def.h"
+	"Button.h"
+
+1747118760 source:e:\c++\game\loadtexture.cpp
+	"def.h"
+	"Button.h"
+
+1747125460 e:\c++\game\button.h
+	<SDL.h>
+	<SDL_ttf.h>
+	<string>
+
+1747120146 e:\c++\game\rungame.cpp
+	"def.h"
+	"Button.cpp"
+	"Player.cpp"
+	"Obstacle.cpp"
+
+1747120500 source:e:\c++\game\rungame.cpp
+	"def.h"
+
+1747123026 source:e:\c++\game\global.cpp
+	"def.h"
+
+1747121255 e:\c++\game\player.h
+	"def.h"
+
+1747121255 e:\c++\game\obstacle.h
+	"def.h"
 
