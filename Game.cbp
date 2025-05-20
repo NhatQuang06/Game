@@ -32,6 +32,17 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<Unit filename="Button.cpp">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Button.h" />
+		<Unit filename="Music.cpp" />
+		<Unit filename="Music.h" />
+		<Unit filename="Obstacle.cpp">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Player.cpp" />
+		<Unit filename="def.h" />
 		<Unit filename="main.cpp" />
 		<Extensions>
 			<lib_finder disable_auto="1" />

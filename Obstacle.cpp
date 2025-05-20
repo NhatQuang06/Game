@@ -15,7 +15,7 @@ public:
 
     SDL_Rect getHitbox() const {
         SDL_Rect rect = getRect();
-        return { rect.x + 5, rect.y + 5, rect.w - 10, rect.h - 10 };
+        return { rect.x + 50, rect.y + 50, rect.w - 20, rect.h - 20 };
     }
 
     void render(SDL_Renderer* renderer, SDL_Texture* texture) const {

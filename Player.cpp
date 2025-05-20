@@ -7,7 +7,7 @@ public:
     int frameIndex = 0;
 
     Player(SDL_Rect* spriteFrames) : x(50), frames(spriteFrames) {
-        y = HEIGHT - frames[0].h * 0.5 - 50;
+        y = HEIGHT - frames[0].h * 0.5 - 70;
     }
 
     void handleJump() {
@@ -53,7 +53,7 @@ public:
 
     SDL_Rect getHitbox() const {
         SDL_Rect rect = getDestRect();
-        return { rect.x + 10, rect.y + 20, rect.w - 10, rect.h - 10 };
+        return { rect.x , rect.y + 20, rect.w - 10, rect.h - 10 };
     }
 
     void render(SDL_Renderer* renderer, SDL_Texture* texture, bool isGameOver) const {

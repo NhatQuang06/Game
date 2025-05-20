@@ -1,6 +1,5 @@
 #ifndef BUTTON_H
 #define BUTTON_H
-
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <string>
@@ -11,7 +10,7 @@ private:
     std::string text;
     SDL_Color textColor;
     TTF_Font* font;
-    bool isHovered = false; // ← Thêm thuộc tính này
+    bool isHovered = false;
 
 public:
     Button(int x, int y, int w, int h, const std::string& text, SDL_Color color, TTF_Font* font);

@@ -6,13 +6,13 @@ Button::Button(int x, int y, int w, int h, const std::string& text, SDL_Color co
 
 void Button::render(SDL_Renderer* renderer) {
     if (isHovered) {
-        SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);  // Hover: xanh lá
+        SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
     } else {
-        SDL_SetRenderDrawColor(renderer, 70, 70, 70, 255); // Mặc định
+        SDL_SetRenderDrawColor(renderer, 70, 70, 70, 255);
     }
 
     SDL_RenderFillRect(renderer, &rect);
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // Viền trắng
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderDrawRect(renderer, &rect);
 
     SDL_Surface* surface = TTF_RenderText_Solid(font, text.c_str(), textColor);

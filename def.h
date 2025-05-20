@@ -1,6 +1,5 @@
 #ifndef DEF_H_INCLUDED
 #define DEF_H_INCLUDED
-
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
 #include <SDL_ttf.h>
@@ -18,7 +17,4 @@ const int ANIMATION_SPEED = 70;
 const int JUMP_HEIGHT = 200;
 const int GRAVITY = 5;
 const int OBSTACLE_SPEED = 15;
-
-
-
 #endif // DEF_H_INCLUDED
