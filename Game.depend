@@ -17,7 +17,7 @@
 	<ctime>
 	<SDL_image.h>
 
-1747735712 source:e:\c++\game\main.cpp
+1747848088 source:e:\c++\game\main.cpp
 	"def.h"
 	"Button.h"
 	"Player.cpp"
@@ -25,7 +25,7 @@
 	<fstream>
 	"Music.h"
 
-1747730618 e:\c++\game\def.h
+1747810429 e:\c++\game\def.h
 	<SDL.h>
 	<SDL_ttf.h>
 	<iostream>
@@ -45,16 +45,16 @@
 1747119532 e:\c++\game\button.cpp
 	"def.h"
 
-1747284759 source:e:\c++\game\player.cpp
+1747812306 source:e:\c++\game\player.cpp
 	"def.h"
 
-1747284791 source:e:\c++\game\obstacle.cpp
+1747810429 source:e:\c++\game\obstacle.cpp
 	"def.h"
 
-1747284759 e:\c++\game\player.cpp
+1747812306 e:\c++\game\player.cpp
 	"def.h"
 
-1747284791 e:\c++\game\obstacle.cpp
+1747810429 e:\c++\game\obstacle.cpp
 	"def.h"
 
 1747118734 e:\c++\game\loadtexture.cpp

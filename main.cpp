@@ -16,6 +16,16 @@ SDL_Texture* backgroundTexture = nullptr;
 SDL_Texture* menuBackgroundTexture = nullptr;
 SDL_Rect frames[FRAME_COUNT];
 TTF_Font* font = nullptr;
+SDL_Texture* backgroundDayTexture = nullptr;
+SDL_Texture* backgroundNightTexture = nullptr;
+SDL_Texture* currentBackgroundTexture = nullptr;
+
+bool isDay = true;
+bool isFading = false;
+Uint32 fadeStartTime = 0;
+const Uint32 fadeDuration = 2000;
+Uint32 lastBackgroundSwitch = 0;
+const Uint32 backgroundSwitchInterval = 15000;
 
 bool inMainMenu = true;
 bool showMusicMenu = false;
@@ -29,6 +39,10 @@ Button* musicOnButton;
 Button* musicOffButton;
 Button* returnToMenuButton;
 Uint32 lastUpdate = 0;
+Uint32 gameStartTime = 0;
+int obstacleSpeed = OBSTACLE_SPEED;
+int animationSpeed = ANIMATION_SPEED;
+
 Player* player = nullptr;
 Obstacle* obstacle = nullptr;
 int volumeLevel = 5;
@@ -66,11 +80,13 @@ bool init() {
     return true;
 }
 bool loadMedia() {
-    menuBackgroundTexture = IMG_LoadTexture(renderer, "background2.png");
-    backgroundTexture = IMG_LoadTexture(renderer, "background.png");
+    menuBackgroundTexture = IMG_LoadTexture(renderer, "main menu.png");
+    backgroundDayTexture = IMG_LoadTexture(renderer, "background.png");
+    backgroundNightTexture = IMG_LoadTexture(renderer, "background2.png");
+    currentBackgroundTexture = backgroundDayTexture;
     spriteSheet = IMG_LoadTexture(renderer, "player_spritesheet.png");
     obstacleTexture = IMG_LoadTexture(renderer, "obstacle.png");
-    if (!menuBackgroundTexture || !backgroundTexture || !spriteSheet || !obstacleTexture) return false;
+    if (!menuBackgroundTexture || !spriteSheet || !obstacleTexture) return false;
 
     int sheetWidth, sheetHeight;
     SDL_QueryTexture(spriteSheet, nullptr, nullptr, &sheetWidth, &sheetHeight);
@@ -119,7 +135,7 @@ void close() {
     delete backToMenuButton;
     delete returnToMenuButton;
     TTF_CloseFont(font);
-     // Ghi high score ra file
+
     std::ofstream outFile("highscore.txt");
     if (outFile.is_open()) {
         outFile << highScore;
@@ -129,11 +145,11 @@ void close() {
     SDL_Quit();
 }
 
-// ================= MENU & RENDER ===================
+
 void renderMenu() {
     SDL_RenderClear(renderer);
     SDL_Rect bgRect = { 0, 0, WIDTH, HEIGHT };
-    SDL_RenderCopy(renderer, menuBackgroundTexture, nullptr, &bgRect);  // vẽ nền menu
+    SDL_RenderCopy(renderer, menuBackgroundTexture, nullptr, &bgRect);
 
     if (inMainMenu) {
         if (showMusicMenu) {
@@ -144,14 +160,14 @@ void renderMenu() {
             int barWidth = 200;
             int barHeight = 30;
 
-            // Vẽ khung ngoài màu trắng
+
             SDL_Rect outlineRect = { barX, barY, barWidth, barHeight };
             SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
             SDL_RenderDrawRect(renderer, &outlineRect);
 
-            // Vẽ phần màu xanh dương tương ứng volume
+
             SDL_Rect fillRect = { barX, barY, volumeLevel * (barWidth / maxVolumeLevel), barHeight };
-            SDL_SetRenderDrawColor(renderer, 0, 191, 255, 255);  // DeepSkyBlue
+            SDL_SetRenderDrawColor(renderer, 0, 191, 255, 255);
             SDL_RenderFillRect(renderer, &fillRect);
             returnToMenuButton->render(renderer);
         } else {
@@ -194,6 +210,13 @@ void handleEvents(bool& running) {
                         delete obstacle;
                         player = new Player(frames);
                         obstacle = new Obstacle();
+                        obstacleSpeed = OBSTACLE_SPEED;
+                        animationSpeed = ANIMATION_SPEED;
+                        gameStartTime = SDL_GetTicks();
+                        isDay = true;
+                        isFading = false;
+                        currentBackgroundTexture = backgroundDayTexture;
+                        lastBackgroundSwitch = SDL_GetTicks();
                     } else if (musicButton->isClicked(x, y)) {
                         showMusicMenu = true;
                     } else if (exitButton->isClicked(x, y)) {
@@ -209,6 +232,11 @@ void handleEvents(bool& running) {
                     delete obstacle;
                     player = new Player(frames);
                     obstacle = new Obstacle();
+                    gameStartTime = SDL_GetTicks();
+                    isDay = true;
+                    isFading = false;
+                    currentBackgroundTexture = backgroundDayTexture;
+                    lastBackgroundSwitch = SDL_GetTicks();
                 } else if (backToMenuButton->isClicked(x, y)) {
                     inMainMenu = true;
                 }
@@ -265,9 +293,35 @@ void handleEvents(bool& running) {
 }
 
 void render(const Player* player, const Obstacle* obstacle) {
-    SDL_Rect bgRect = { 0, 0, WIDTH, HEIGHT };
+
     SDL_RenderClear(renderer);
-    SDL_RenderCopy(renderer, backgroundTexture, nullptr, &bgRect);
+    SDL_Rect bgRect = { 0, 0, WIDTH, HEIGHT };
+
+    Uint32 now = SDL_GetTicks();
+
+    if (isFading) {
+        float t = (float)(now - fadeStartTime) / fadeDuration;
+        if (t >= 1.0f) {
+            isFading = false;
+            isDay = !isDay;
+            currentBackgroundTexture = isDay ? backgroundDayTexture : backgroundNightTexture;
+            SDL_RenderCopy(renderer, currentBackgroundTexture, nullptr, &bgRect);
+        } else {
+            SDL_Texture* from = isDay ? backgroundDayTexture : backgroundNightTexture;
+            SDL_Texture* to = isDay ? backgroundNightTexture : backgroundDayTexture;
+
+            SDL_SetTextureAlphaMod(from, Uint8((1.0f - t) * 255));
+            SDL_SetTextureAlphaMod(to, Uint8(t * 255));
+
+            SDL_RenderCopy(renderer, from, nullptr, &bgRect);
+            SDL_RenderCopy(renderer, to, nullptr, &bgRect);
+
+            SDL_SetTextureAlphaMod(from, 255);
+            SDL_SetTextureAlphaMod(to, 255);
+        }
+    } else {
+        SDL_RenderCopy(renderer, currentBackgroundTexture, nullptr, &bgRect);
+    }
     player->render(renderer, spriteSheet, gameOver);
     obstacle->render(renderer, obstacleTexture);
     if (gameOver) renderMenu();
@@ -284,11 +338,12 @@ void render(const Player* player, const Obstacle* obstacle) {
     SDL_RenderPresent(renderer);
 }
 
-// ================= GAME LOOP ===================
 void runGameLoop() {
     bool running = true;
     audioManager.playMusic();
     lastUpdate = SDL_GetTicks();
+    gameStartTime = SDL_GetTicks();
+    lastBackgroundSwitch = SDL_GetTicks();
     player = new Player(frames);
     obstacle = new Obstacle();
 
@@ -298,8 +353,21 @@ void runGameLoop() {
             renderMenu();
         } else {
             if (!gameOver) {
+
+                int elapsed = static_cast<int>((SDL_GetTicks() - gameStartTime) / 1000);
+
+
+                obstacleSpeed = std::min(30, 15 + elapsed / 10);
+                animationSpeed = std::max(30, 70 - elapsed / 2);
+
                 player->update(lastUpdate);
                 obstacle->update();
+                Uint32 now = SDL_GetTicks();
+                if (!isFading && now - lastBackgroundSwitch >= backgroundSwitchInterval) {
+                    isFading = true;
+                    fadeStartTime = now;
+                    lastBackgroundSwitch = now;
+                }
                 score += 1;
                 SDL_Rect playerHitbox = player->getHitbox();
                 SDL_Rect obstacleHitbox = obstacle->getHitbox();
@@ -322,7 +390,6 @@ void runGameLoop() {
     delete obstacle;
 }
 
-// ================= MAIN ===================
 int main(int argc, char* args[]) {
     if (!init() || !loadMedia()) return -1;
     runGameLoop();

@@ -19,7 +19,8 @@ public:
 
     void update(Uint32& lastUpdate) {
         Uint32 now = SDL_GetTicks();
-        if (now - lastUpdate > ANIMATION_SPEED) {
+        extern int animationSpeed;
+        if (now - lastUpdate > animationSpeed) {
             frameIndex = (frameIndex + 1) % FRAME_COUNT;
             lastUpdate = now;
         }

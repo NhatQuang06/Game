@@ -5,7 +5,8 @@ public:
     Obstacle() : x(WIDTH) {}
 
     void update() {
-        x -= OBSTACLE_SPEED;
+        extern int obstacleSpeed;
+        x -= obstacleSpeed;
         if (x < -50) x = WIDTH;
     }
 
