@@ -1,7 +1,7 @@
-# Game Don't Trip Meow!
-Game: Don't Trip Meow!
-Họ và Tên: Đặng Nhật Quang
-MSSV: 24021606
+# Game: Don't Trip Meow!
+
++Họ và Tên: Đặng Nhật Quang
++MSSV: 24021606
 
 * Chủ đề game: 
 + Một game chạy không ngừng đơn giản được xây dựng bằng C++ sử dụng thư viện SDL2. 
