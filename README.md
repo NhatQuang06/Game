@@ -49,7 +49,7 @@ Sử dụng ChatGPT để:
     Học cú pháp Pygame nâng cao như pygame.Rect, xử lý animation.
     Sửa lỗi khi game bị crash.
 * Hình ảnh: 
-![Hoạt ảnh con mèo](player_spritesheet-2.png) lấy ở trên mạng
+![Hoạt ảnh con mèo](player_spritesheet-2.png) lấy ở trên mạng https://www.freepik.com/vectors/animation-sequence
 ![Nền buổi sáng ](background-1.png) nhờ chat gpt vễ hộ
 ![Nền buổi tối](background2-1.png) nhờ chat gpt vễ hộ
 ![Chướng ngại vật con nhím](obstacle-1.png) nhờ chat gpt vẽ hộ
